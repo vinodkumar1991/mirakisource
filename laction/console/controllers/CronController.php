@@ -10,4 +10,9 @@ class CronController extends Controller
     {
         echo 'test the yyyy'; 
     }
+    
+    public function actionEmail()
+    {
+        echo 'test the yyyy';
+    }
 }
