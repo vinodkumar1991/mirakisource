@@ -8,6 +8,6 @@ class CronController extends Controller
 
     public function actionSms()
     {
-        echo 'test the';
+        echo 'test the ddd'; 
     }
 }
