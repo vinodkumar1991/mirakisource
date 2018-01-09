@@ -15,4 +15,8 @@ class CronController extends Controller
     {
         echo 'test the yyyy';
     }
+	public function actionSend()
+    {
+        echo 'test the sssss';
+    }
 }
