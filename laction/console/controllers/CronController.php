@@ -14,6 +14,7 @@ class CronController extends Controller
     public function actionEmail()
     {
         echo 'test the yyyy';
+        echo 'test the mmmm';
     }
 	
 }
