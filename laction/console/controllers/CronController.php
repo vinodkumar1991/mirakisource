@@ -8,15 +8,12 @@ class CronController extends Controller
 
     public function actionSms()
     {
-        echo 'test the yyyy'; 
+        echo 'Today Test for git'; 
     }
     
     public function actionEmail()
     {
         echo 'test the yyyy';
     }
-	public function actionSend()
-    {
-        echo 'test the sssss';
-    }
+	
 }
