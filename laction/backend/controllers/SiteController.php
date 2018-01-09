@@ -96,5 +96,9 @@ class SiteController extends Controller {
     public function actionTest() {
         echo 'dddddd'; die();
     }
+	
+	 public function actionTest1() {
+        echo 'from laxmi lap'; die();
+    }
 
 }
