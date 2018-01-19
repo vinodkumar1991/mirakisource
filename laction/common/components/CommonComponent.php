@@ -34,7 +34,7 @@ class CommonComponent
         return [
             'sms' => [
                 'transactional' => 4,
-                'promotional' => 6
+                'promotional' => 1
             ]
         ];
     }

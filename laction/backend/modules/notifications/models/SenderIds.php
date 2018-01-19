@@ -36,10 +36,6 @@ class SenderIds extends ActiveRecord
                 'safe'
             ],
             [
-                'subject',
-                'isValidSubject'
-            ],
-            [
                 [
                     'subject'
                 ],
@@ -47,6 +43,11 @@ class SenderIds extends ActiveRecord
                 'min' => 6,
                 'max' => 135
             ],
+            [
+                'subject',
+                'isValidSubject'
+            ],
+            
             // Need To Implement
             // Sender ID,While using route4 sender id should be 6 characters long.
             [
@@ -137,12 +138,12 @@ class SenderIds extends ActiveRecord
         return $arrResponse;
     }
 
-    public function isValidRoute()
+    public function isValidRoute($attribute, $params)
     {
         if (! empty($this->route)) {
-            $intSubject = strlength($this->subject);
-            if (4 == $this->route && 6 != $intSubject) {
-                $this->addError($this->subject, 'Subject should be 6 charcters only.');
+            $intSubject = strlen($this->subject);
+            if ((4 == $this->route && 'transactional' == $this->category_type) && 6 != $intSubject) {
+                $this->addError('subject', 'Subject should be 6 charcters only.');
                 return false;
             } else {
                 return true;

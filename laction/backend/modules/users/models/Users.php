@@ -26,7 +26,8 @@ class Users extends ActiveRecord
                     'phone',
                     'status'
                 ],
-                'required'
+                'required',
+                'message' => '{attribute} is required'
             ],
             [
                 [
@@ -145,13 +146,14 @@ class Users extends ActiveRecord
     {
         $objQuery = new Query();
         $objQuery->select([
-            'u.fullname',
             'u.id as user_id',
-            'u.phone',
-            'u.password',
+            'u.fullname',
             'u.role_id',
             'u.role_name',
+            'u.password',
             'u.email',
+            'u.phone',
+            'u.image',
             'u.status'
         ]);
         $objQuery->from('users as u');

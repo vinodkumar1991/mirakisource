@@ -1,7 +1,5 @@
 <!-- Topbar -->
 <header class="topbar">
-
-
 	<div class="topbar-left">
 		<span class="topbar-btn sidebar-toggler"><i>&#9776;</i></span> <a
 			class="topbar-btn d-none d-md-block" href="#"
@@ -43,6 +41,7 @@
 			<input class="form-control w-300px" type="text">
 			<div class="lookup-placeholder">
 				<i class="ti-search"></i>
+
 			</div>
 		</div>
 	</div>
@@ -55,9 +54,7 @@
 
 		<ul class="topbar-btns">
 			<li class="dropdown"><span class="topbar-btn" data-toggle="dropdown"><img
-					class="avatar"
-					src="<?php echo Yii::getAlias('@asset').'/img/avatar/1.jpg'?>"
-					alt="..."></span>
+					class="avatar" src="assets/img/avatar/1.jpg" alt="..."></span>
 				<div class="dropdown-menu dropdown-menu-right">
 					<a class="dropdown-item" href="profile.php"><i class="ti-user"></i>
 						Profile</a> <a class="dropdown-item" href="mailbox.php">

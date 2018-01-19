@@ -6,6 +6,8 @@ use Yii;
 use common\components\CommonComponent;
 use backend\modules\notifications\models\SenderIds;
 use backend\modules\notifications\models\Template;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 class NotificationController extends Controller
 {
@@ -21,22 +23,22 @@ class NotificationController extends Controller
         $arrResponse = [];
         $arrMessageTypes = CommonComponent::getMessageTypes();
         $arrMessageCategoryTypes = CommonComponent::getMessageCategoryTypes();
-        $arrRoutes = CommonComponent::getRoutes();
         $arrInputs = Yii::$app->request->post();
-        if (isset($arrInputs['create_sender_id'])) {
-            $arrInputs['route'] = isset($arrRoutes[$arrInputs['message_type']][$arrInputs['category_type']]) ? $arrRoutes[$arrInputs['message_type']][$arrInputs['category_type']] : NULL;
-            $arrResponse = ! empty($arrInputs) ? $this->saveSenderId($arrInputs) : [];
-        }
+        $arrResponse = isset($arrInputs['create_sender_id']) ? $this->saveSenderId($arrInputs) : [];
+        isset($arrResponse['sender_id']) ? Yii::$app->session->setFlash('subject_success', 'Subject created Successfully.') : NULL;
         return $this->render('/SenderId', [
             'message_types' => $arrMessageTypes,
             'category_types' => $arrMessageCategoryTypes,
-            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : []
+            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : [],
+            'fields' => isset($arrResponse['fields']) ? $arrResponse['fields'] : []
         ]);
     }
 
     private function saveSenderId($arrInputs)
     {
         $arrResponse = [];
+        $arrRoutes = CommonComponent::getRoutes();
+        $arrInputs['route'] = isset($arrRoutes[$arrInputs['message_type']][$arrInputs['category_type']]) ? $arrRoutes[$arrInputs['message_type']][$arrInputs['category_type']] : NULL;
         $objSenderId = new SenderIds();
         $arrDefaults = $objSenderId->getDefaults();
         $arrInputs = array_merge($arrInputs, $arrDefaults);
@@ -46,6 +48,7 @@ class NotificationController extends Controller
             $arrResponse['sender_id'] = $objSenderId->id;
         } else {
             $arrResponse['errors'] = $objSenderId->errors;
+            $arrResponse['fields'] = $objSenderId->getAttributes();
         }
         unset($arrInputs, $arrDefaults);
         return $arrResponse;
@@ -56,22 +59,12 @@ class NotificationController extends Controller
         $arrResponse = [];
         $arrMessageTypes = CommonComponent::getMessageTypes();
         $arrInputs = Yii::$app->request->post();
-        $arrInputs = [
-            'message_type' => 'sms',
-            'from_email' => 'info@lactionstudio.com',
-            'senderid_id' => 1,
-            'code' => 'NEWRG',
-            'name' => 'User Registration',
-            'template' => '<div><p>abc</p></div>',
-            'description' => 'Hi Hello Please check it.',
-            'status' => 'active'
-        ];
         $arrResponse = ! empty($arrInputs) ? $this->saveTemplate($arrInputs) : [];
-        print_r($arrResponse);
-        die();
+        isset($arrResponse['template_id']) ? Yii::$app->session->setFlash('template_success', 'Template created Successfully.') : NULL;
         return $this->render('/Template', [
             'message_types' => $arrMessageTypes,
-            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : []
+            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : [],
+            'fields' => isset($arrResponse['fields']) ? $arrResponse['fields'] : []
         ]);
     }
 
@@ -87,6 +80,7 @@ class NotificationController extends Controller
             $arrResponse['template_id'] = $objTemplate->id;
         } else {
             $arrResponse['errors'] = $objTemplate->errors;
+            $arrResponse['fields'] = $objTemplate->getAttributes();
         }
         unset($arrInputs, $arrDefaults);
         return $arrResponse;
@@ -111,5 +105,14 @@ class NotificationController extends Controller
             'category_types' => $arrMessageCategoryTypes,
             'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : []
         ]);
+    }
+
+    public function getSubjects()
+    {
+        $strResponse = NULL;
+        $arrInputs = Yii::$app->request->post();
+        if (! empty($arrInputs)) {}
+        
+        echo $strResponse;
     }
 }

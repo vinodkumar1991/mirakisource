@@ -3,6 +3,7 @@ namespace app\modules\users\controllers;
 
 use yii\web\Controller;
 use Yii;
+use backend\controllers\GoController;
 use backend\modules\users\models\Roles;
 use backend\modules\users\models\Permissions;
 use backend\modules\users\models\RolePermissions;
@@ -10,8 +11,10 @@ use backend\modules\users\models\Users;
 use backend\modules\users\models\Token;
 use common\components\CommonComponent;
 use yii\helpers\Json;
+use yii\helpers\ArrayHelper;
+use backend\modules\users\models\Login;
 
-class UsersController extends Controller
+class UsersController extends GoController
 {
 
     public function beforeAction($action)
@@ -22,7 +25,78 @@ class UsersController extends Controller
 
     public function actionLogin()
     {
-        return $this->render('/Login', []);
+        $arrInputs = Yii::$app->request->post();
+        $arrInputs = [
+            'phone' => '1234567890',
+            'password' => '12345',
+            'do_login' => 'Login'
+        ];
+        $arrResponse = isset($arrInputs['do_login']) ? $this->validateCredentials($arrInputs) : [];
+        if (isset($arrResponse['user'])) {
+            $this->setSession($arrResponse['user']);
+            echo 'hhh'; die();
+            $this->redirect(Yii::getAlias('@web') . '/dashboard');
+        }
+        return $this->render('/users/Login', [
+            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : [],
+            'fields' => isset($arrResponse['fields']) ? $arrResponse['fields'] : []
+        ]);
+    }
+
+    private function validateCredentials($arrInputs)
+    {
+        $arrResponse = [];
+        $objLogin = new Login();
+        $objLogin->scenario = 'login';
+        $objLogin->attributes = $arrInputs;
+        if ($objLogin->validate()) {
+            $arrValidatedInputs = $objLogin->getAttributes();
+            $arrUser = Users::getUsers([
+                'phone' => $arrValidatedInputs['phone']
+            ]);
+            $arrUser = isset($arrUser[0]) ? $arrUser[0] : [];
+            if (! empty($arrUser)) {
+                // Validate Password
+                if (Yii::$app->getSecurity()->validatePassword($arrValidatedInputs['password'], $arrUser['password'])) {
+                    $arrResponse['user'] = $arrUser;
+                } else {
+                    $arrResponse['errors']['password'] = 'Invalid Password';
+                }
+            } else {
+                $arrResponse['errors']['phone'] = 'Invalid Phone';
+            }
+            unset($arrUser, $arrInputs);
+        } else {
+            $arrResponse['errors'] = $objLogin->errors;
+            $arrResponse['fields'] = $objLogin->getAttributes();
+        }
+        return $arrResponse;
+    }
+
+    private function setSession($arrUser)
+    {
+        $objSession = Yii::$app->session;
+        $arrSessionData = [
+            'fullname' => $arrUser['fullname'],
+            'role_id' => $arrUser['role_id'],
+            'role_name' => $arrUser['role_name'],
+            'email' => $arrUser['email'],
+            'phone' => $arrUser['phone'],
+            'image' => $arrUser['image']
+        ];
+        $objSession['session_data'] = $arrSessionData;
+        unset($arrUser, $arrSessionData);
+        return true;
+    }
+
+    public function actionLogout()
+    {
+        $objSession = Yii::$app->session;
+        if ($objSession->isActive) {
+            $objSession->close();
+        }
+        $objSession->destroy();
+        $this->redirect(Yii::getAlias('@web') . '/login');
     }
 
     public function actionDashboard()
@@ -102,21 +176,14 @@ class UsersController extends Controller
         ])
             ->asArray()
             ->all();
+        $arrRoles = ArrayHelper::map($arrRoles, 'id', 'name');
         $arrInputs = Yii::$app->request->post();
-//         $arrInputs = [
-//             'fullname' => 'Meda Vinod Kumar',
-//             'role_id' => 1,
-//             'role_name' => 'admin',
-//             'email' => 'vinods@gmail.com',
-//             'phone' => '9705899270',
-//             'status' => 'active'
-//         ];
-        $arrResponse = ! empty($arrInputs) ? $this->saveUser($arrInputs) : [];
-        //print_r($arrResponse);
-        //die();
+        $arrResponse = isset($arrInputs['create_user']) ? $this->saveUser($arrInputs) : [];
+        isset($arrResponse['user_id']) ? Yii::$app->session->setFlash('user_success', 'User created Successfully.') : NULL;
         return $this->render('/User', [
             'roles' => $arrRoles,
-            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : []
+            'errors' => isset($arrResponse['errors']) ? $arrResponse['errors'] : NULL,
+            'fields' => isset($arrResponse['fields']) ? $arrResponse['fields'] : NULL
         ]);
     }
 
@@ -126,12 +193,16 @@ class UsersController extends Controller
         $objUsers = new Users();
         $arrDefaults = $objUsers->getDefaults();
         $arrInputs = array_merge($arrInputs, $arrDefaults);
+        $arrRoleData = explode('-', $arrInputs['role_id']);
+        $arrInputs['role_id'] = $arrRoleData[0];
+        $arrInputs['role_name'] = isset($arrRoleData[1]) ? $arrRoleData[1] : NULL;
         $objUsers->attributes = $arrInputs;
         if ($objUsers->validate()) {
             $objUsers->save();
             $arrResponse['user_id'] = $objUsers->id;
         } else {
             $arrResponse['errors'] = $objUsers->errors;
+            $arrResponse['fields'] = $objUsers->getAttributes();
         }
         unset($arrInputs, $arrDefaults);
         return $arrResponse;
@@ -179,9 +250,9 @@ class UsersController extends Controller
         if ($objToken->validate()) {
             $objToken->save();
             $arrResponse['token_id'] = $objToken->id;
-            //Need To Insert Data Into SMS Table
-            //Need To Insert Data Into Email Table
-            //Need To Run Cron Job
+            // Need To Insert Data Into SMS Table
+            // Need To Insert Data Into Email Table
+            // Need To Run Cron Job
         } else {
             $arrResponse['errors'] = $objToken->errors;
         }

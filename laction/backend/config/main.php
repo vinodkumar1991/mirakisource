@@ -81,13 +81,13 @@ return [
                 'role-permissions' => 'users/users/role-permissions',
                 'create-user' => 'users/users/create-user',
                 'gen' => 'users/users/generate-otp', // Need To Remove
-                'senderid' => 'notifications/notification/create-sender-id',
+                'subject' => 'notifications/notification/create-sender-id',
                 'template' => 'notifications/notification/create-template',
                 'edit-senderid/<id:\d+>' => 'notifications/notification/edit-sender-id',
                 'create-slot' => 'uploads/uploads/create-slot',
                 'upload' => 'uploads/uploads/upload-files',
                 'login' => 'users/users/login',
-                'dashboard' => 'dashboard/dashboard/dashboard'
+                'dashboard' => 'users/dashboard/dashboard'
             ]
         ]
     ],
